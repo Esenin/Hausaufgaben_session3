@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/linux.png</file>
+        <file>res/linux_pwd.png</file>
+        <file>res/names.list</file>
+        <file>res/windows.png</file>
+        <file>res/windows_pwd.png</file>
+    </qresource>
+</RCC>
