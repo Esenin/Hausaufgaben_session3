@@ -2,13 +2,31 @@
 
 GameView::GameView(QWidget *parent) :
     QGraphicsView(parent)
+    , mUsersCount(0)
+    , mAgent(NULL)
+    , mDevelopers(NULL)
+    , mTimeForReload(0)
 {
     initGraphicsOutput();
+    qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+    gameKernel = new GameLogic();
+
+    connect(&stepTimer, SIGNAL(timeout()), this, SLOT(stepTimerEvent()));
+    installEventFilter(this);
 }
 
 void GameView::startGame()
 {
+    qDebug() << "start new session";
+    setupNewNetwork();
+    gameKernel->loadNewUsers(mUsers);
+    stepTimer.start(stepTime);
 
+}
+
+void GameView::stopGame()
+{
+    stepTimer.stop();
 }
 
 void GameView::drawBackground(QPainter *painter, const QRectF &rect)
@@ -38,30 +56,83 @@ void GameView::initGraphicsOutput()
 {
     mScene = new QGraphicsScene(this);
     mScene->setItemIndexMethod(QGraphicsScene::NoIndex);
-    mScene->setSceneRect(-220, -20, 1340, 980);
+    mScene->setSceneRect(-220, -20, 1340, 600);
     setScene(mScene);
     setCacheMode(CacheBackground);
     setViewportUpdateMode(BoundingRectViewportUpdate);
     setRenderHint(QPainter::Antialiasing);
     setMinimumSize(960, 520);
 
-
-
-    setWindowTitle("EthernetHero the Game");
-
-//    catapult = new GunMachine;
-//    mScene->addItem(catapult);
-//    catapult->setPos(catapultPosition);
-
-//    QString helpInfo = QString("Control:\n Left-right arrows to change gun power\n") +
-//            QString(" Up-down to change gun angle\n And spacebar to shoot\n 'God' Luck!");
-//    infoMessage = new QGraphicsTextItem(helpInfo);
-//    infoMessage->setFont(QFont("Arial", 10));
-//    mScene->addItem(infoMessage);
-//    infoMessage->setPos(mScene->sceneRect().topLeft());
 }
+
+void GameView::setupNewNetwork()
+{
+    if (mAgent)
+    {
+        delete mAgent;
+        delete mDevelopers;
+        mUsers.clear();
+    }
+    mAgent = new WorkStation(hacker);
+    mScene->addItem(mAgent);
+    mAgent->setPos(sceneRect().left() + 10, mScene->sceneRect().center().y());
+
+    mDevelopers = new WorkStation(target);
+    mScene->addItem(mDevelopers);
+    mDevelopers->setPos(mScene->sceneRect().right() - 110, mScene->sceneRect().center().y());
+
+    mUsersCount = (qrand() % (maxUsers - minUsers + 1)) + minUsers;
+    for (int i = 0; i < mUsersCount; i++)
+    {
+        mUsers.append(new WorkStation());
+    }
+
+    setUsersToGrid();
+}
+
+void GameView::setUsersToGrid()
+{
+    int const shift = 50;
+    qreal xPos = 0;
+    qreal yPos = 0;
+    foreach (WorkStation *station, mUsers)
+    {
+        station->setPos(xPos, yPos);
+        mScene->addItem(station);
+
+        xPos += station->boundingRect().width() + shift;
+        if (xPos > mDevelopers->x() - station->boundingRect().width())
+        {
+            xPos = 0;
+            yPos += station->boundingRect().height() + shift;
+        }
+    }
+
+    qDebug() << "deployed to grid";
+
+}
+
+bool GameView::eventFilter(QObject *, QEvent *event)
+{
+    if (event->type() == QEvent::MouseButtonDblClick)
+    {
+        if (mTimeForReload == 0)
+        {
+            mTimeForReload = trafficReloadTime;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return false;
+
+}
+
 
 void GameView::stepTimerEvent()
 {
-
+    gameKernel->makeNextMove();
+    if (mTimeForReload)
+        mTimeForReload--;
 }

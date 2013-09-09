@@ -7,8 +7,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setCentralWidget(&viewport);
-    viewport.startGame();
     showMaximized();
+    setWindowTitle("EthernetHero the Game");
+
+    connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
+
+    viewport.startGame();
 }
 
 MainWindow::~MainWindow()
