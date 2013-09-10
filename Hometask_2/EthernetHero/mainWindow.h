@@ -3,6 +3,7 @@
 #include <QMainWindow>
 
 #include "gameView.h"
+#include "gameLogic.h"
 
 namespace Ui {
 class MainWindow;
@@ -18,6 +19,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    GameLogic *gameKernel;
     GameView viewport;
 };
 

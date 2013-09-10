@@ -9,10 +9,11 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(&viewport);
     showMaximized();
     setWindowTitle("EthernetHero the Game");
+    gameKernel = new GameLogic(&viewport);
 
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
-    viewport.startGame();
+    gameKernel->startGame();
 }
 
 MainWindow::~MainWindow()

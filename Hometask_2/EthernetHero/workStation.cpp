@@ -8,6 +8,7 @@ WorkStation::WorkStation(StationType const stationType)
     , mStationType(stationType)
 {
     initSocialPos(stationType);
+    mConnected.clear();
 }
 
 QRectF WorkStation::boundingRect() const
@@ -71,12 +72,27 @@ void WorkStation::decBases(const int outdated)
     update(mBoundingRect);
 }
 
+void WorkStation::connectWith(WorkStation *station)
+{
+    mConnected.append(station);
+}
+
 void WorkStation::energyChange(const bool canUpdate)
 {
     mCouldBeUpdated = canUpdate;
 }
 
-
+void WorkStation::dataTransfer()
+{
+    if (!mInfected)
+        return;
+    foreach (WorkStation *station, mConnected)
+    {
+        int const attackPerfomance = qrand() & 100;
+        if (attackPerfomance > calcDefenceRate(station->mOperationSystem, station->mBasesActuality))
+            station->getVirus();
+    }
+}
 
 void WorkStation::loadFromFile(QStringList *list)
 {
@@ -135,5 +151,21 @@ void WorkStation::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *)
 
     mInfected = false;
     mBasesActuality = 99;
-    this->update(mBoundingRect);
+    update(mBoundingRect);
+    emit updated();
+}
+
+void WorkStation::getVirus()
+{
+    mInfected = true;
+    mBasesActuality = 0;
+    update(mBoundingRect);
+}
+
+int WorkStation::calcDefenceRate(const WorkStation::OperationSystems osType, const int basesRate)
+{
+    int const maxOSDefence = 95;
+    qreal const maxOS = (double) 1 / debian;
+    qreal const osDefenceRate = ((double) 1 / osType) * maxOSDefence / maxOS;
+    return (int) ((basesRate + osDefenceRate) / 2);
 }

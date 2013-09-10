@@ -13,8 +13,9 @@ enum StationType
 };
 
 
-class WorkStation : public QGraphicsItem
+class WorkStation : public QObject, public QGraphicsItem
 {
+    Q_OBJECT
 public:
     explicit WorkStation(StationType const stationType = user);
 
@@ -24,25 +25,33 @@ public:
     QPointF outcomingPort() const;
 
     void decBases(int const outdated);
+    void connectWith(WorkStation *station);
 
 
 public slots:
     void energyChange(bool const canUpdate);
+    void dataTransfer();
+
+signals:
+    void updated();
 
 protected:
-    void loadFromFile(QStringList* list);
-    void initSocialPos(StationType const stationType);
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
-
-private:
     enum OperationSystems
     {
-        backTrack = 0
+        backTrack = 1
         ,debian
         ,ubuntu
         ,windows7
         ,winXP
     };
+    void loadFromFile(QStringList* list);
+    void initSocialPos(StationType const stationType);
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    void getVirus();
+    int calcDefenceRate(OperationSystems const osType, int const basesRate);
+
+private:
+
 
     OperationSystems mOperationSystem;
     StationType mStationType;
@@ -51,6 +60,7 @@ private:
     QString mName;
     QRectF mBoundingRect;
     bool mCouldBeUpdated;
+    QList<WorkStation *> mConnected;
 };
 
 
