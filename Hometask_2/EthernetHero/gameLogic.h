@@ -36,7 +36,7 @@ private:
 
     //! Time to reload updates ability
     static int const trafficReloadTime = 1;
-    static int const maxUsers = 6;
+    static int const maxUsers = 12;
     static int const minUsers = 4;
     static int const mainConnectionCount = 3;
     QTimer stepTimer;
@@ -44,6 +44,7 @@ private:
     QList<WorkStation *> mUsers;
     WorkStation *mAgent;
     WorkStation *mDevelopers;
+    int mScores;
 
 
     int mUsersCount;

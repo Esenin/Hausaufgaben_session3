@@ -148,7 +148,7 @@ void WorkStation::initSocialPos(const StationType stationType)
     {
         mName = "R&D server";
         mOperationSystem = debian;
-        mBasesActuality = 100;
+        mBasesActuality = 98;
         mInfected = false;
         break;
     }
@@ -184,7 +184,7 @@ void WorkStation::getVirus()
     if (mInfected)
         return;
 
-    if (mBasesActuality == 100) // only R&D departmant
+    if (mName == "R&D server") // only R&D departmant
         emit secretDepartInfected();
 
     mInfected = true;
@@ -196,7 +196,7 @@ void WorkStation::getVirus()
 
 int WorkStation::calcDefenceRate(const WorkStation::OperationSystems osType, const int basesRate)
 {
-    int const maxOSDefence = 95;
+    int const maxOSDefence = 97;
     qreal const maxOS = (double) 1 / debian;
     qreal const osDefenceRate = ((double) 1 / osType) * maxOSDefence / maxOS;
     return (int) ((2 * basesRate + osDefenceRate) / 3);

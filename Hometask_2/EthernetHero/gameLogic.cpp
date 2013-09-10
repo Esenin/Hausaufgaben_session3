@@ -6,6 +6,7 @@ GameLogic::GameLogic(GameView *viewport)
     , mDevelopers(NULL)
     , mUsersCount(0)
     , mTimeForReload(0)
+    , mScores(0)
 {
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
     connect(&stepTimer, SIGNAL(timeout()), this, SLOT(stepTimerEvent()));
@@ -42,8 +43,6 @@ void GameLogic::setupNewComputers()
         connect(this, SIGNAL(energyChanged(bool)), newStation, SLOT(energyChange(bool)));
         connect(newStation, SIGNAL(updated()), this, SLOT(setReloadTime()));
     }
-
-
 }
 
 void GameLogic::setUsersToGrid()

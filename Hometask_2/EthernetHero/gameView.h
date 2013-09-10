@@ -31,6 +31,7 @@ protected:
 private:
     QGraphicsTextItem *mGameOverText;
     QGraphicsTextItem *mInfoMessage;
+    QGraphicsTextItem *mScoreText;
     QGraphicsScene *mScene;
 };
 

@@ -85,7 +85,7 @@ void GameView::initGraphicsOutput()
 {
     mScene = new QGraphicsScene(this);
     mScene->setItemIndexMethod(QGraphicsScene::NoIndex);
-    mScene->setSceneRect(-220, -100, 1340, 600);
+    mScene->setSceneRect(-220, -50, 1340, 600);
     setScene(mScene);
     setCacheMode(CacheBackground);
     setViewportUpdateMode(BoundingRectViewportUpdate);
@@ -93,8 +93,10 @@ void GameView::initGraphicsOutput()
     setMinimumSize(960, 520);
 
     mGameOverText = new QGraphicsTextItem("Game Over! \nYou can restart game by pressing Esc");
-    mGameOverText->setFont(QFont("Tahoma"));
-    mGameOverText->setPos(mScene->sceneRect().center());
+    mGameOverText->setFont(QFont("Tahoma", 30));
+    mGameOverText->setDefaultTextColor(Qt::white);
+    mGameOverText->setZValue(mGameOverText->zValue() + 1);
+    mGameOverText->setPos(mScene->sceneRect().center() - QPoint((mScene->width() / 3), 0));
 
     QString helpInfo = QString("Prevent hackers attack to main server!\n") +
             QString("Use mouse double click to heal computer!\n 'God' Luck!");
@@ -108,7 +110,7 @@ qreal GameView::calcPoolLevel(WorkStation const *first, WorkStation const *secon
 {
     int const stepPx = 10;
     qreal const shift = second->pos().x() / (first->pos().x() + first->boundingRect().width());
-    qreal const startPoolHeight = mScene->sceneRect().center().y() - stepPx;
+    qreal const startPoolHeight = first->boundingRect().height();
     return startPoolHeight + stepPx * shift;
 
 }
