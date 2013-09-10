@@ -6,9 +6,12 @@ WorkStation::WorkStation(StationType const stationType)
     : mBoundingRect(QRectF(0,0, 100, 160))
     , mCouldBeUpdated(true)
     , mStationType(stationType)
+    , mSkipOneDay(false)
 {
     initSocialPos(stationType);
     mConnected.clear();
+    int const boundPx = 10;
+    mPort = mBoundingRect.center();
 }
 
 QRectF WorkStation::boundingRect() const
@@ -51,17 +54,12 @@ void WorkStation::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 
     QStringList osNames;
     osNames << "backTrack" << "debian" << "ubuntu" << "windows7" << "winXP";
-    painter->drawText(xPos, yPos, QString("OS: " + osNames.at(mOperationSystem)));
+    painter->drawText(xPos, yPos, QString("OS: " + osNames.at(mOperationSystem - backTrack)));
 }
 
-QPointF WorkStation::incomingPort() const
+QPointF WorkStation::portPos() const
 {
-    return QPointF(pos().x() + mBoundingRect.width() / 2, pos().y());
-}
-
-QPointF WorkStation::outcomingPort() const
-{
-    return QPointF(pos().x() + mBoundingRect.width() / 2, pos().y() + mBoundingRect.height());
+    return mapToScene(mPort);
 }
 
 void WorkStation::decBases(const int outdated)
@@ -74,7 +72,26 @@ void WorkStation::decBases(const int outdated)
 
 void WorkStation::connectWith(WorkStation *station)
 {
-    mConnected.append(station);
+    mConnected << station;
+}
+
+void WorkStation::connectWith(QSet<WorkStation *> const list)
+{
+    foreach (WorkStation *station, list)
+    {
+        mConnected << station;
+        station->connectWith(this);
+    }
+}
+
+QSet<WorkStation *> WorkStation::connected() const
+{
+    return mConnected;
+}
+
+QString WorkStation::name()
+{
+    return mName;
 }
 
 void WorkStation::energyChange(const bool canUpdate)
@@ -86,9 +103,16 @@ void WorkStation::dataTransfer()
 {
     if (!mInfected)
         return;
+
+    if (mSkipOneDay)
+    {
+        mSkipOneDay = false;
+        return;
+    }
+
     foreach (WorkStation *station, mConnected)
     {
-        int const attackPerfomance = qrand() & 100;
+        int const attackPerfomance = qrand() % 100;
         if (attackPerfomance > calcDefenceRate(station->mOperationSystem, station->mBasesActuality))
             station->getVirus();
     }
@@ -131,7 +155,7 @@ void WorkStation::initSocialPos(const StationType stationType)
     default:
         break;
     }
-    if (mName.size() != 0)
+    if (mName.size() > 0)
         return;
 
     int const osCount = 4;
@@ -139,7 +163,7 @@ void WorkStation::initSocialPos(const StationType stationType)
     QStringList nameList;
     loadFromFile(&nameList);
     mName = nameList.at(qrand() % nameList.size());
-    mOperationSystem = (OperationSystems) ((qrand() % osCount) + 1);
+    mOperationSystem = (OperationSystems) ((qrand() % osCount) + debian);
     mBasesActuality = 99 - (qrand() % 20);
     mInfected = false;
 }
@@ -157,9 +181,17 @@ void WorkStation::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *)
 
 void WorkStation::getVirus()
 {
+    if (mInfected)
+        return;
+
+    if (mBasesActuality == 100) // only R&D departmant
+        emit secretDepartInfected();
+
     mInfected = true;
+    mSkipOneDay = true;
     mBasesActuality = 0;
     update(mBoundingRect);
+
 }
 
 int WorkStation::calcDefenceRate(const WorkStation::OperationSystems osType, const int basesRate)
@@ -167,5 +199,5 @@ int WorkStation::calcDefenceRate(const WorkStation::OperationSystems osType, con
     int const maxOSDefence = 95;
     qreal const maxOS = (double) 1 / debian;
     qreal const osDefenceRate = ((double) 1 / osType) * maxOSDefence / maxOS;
-    return (int) ((basesRate + osDefenceRate) / 2);
+    return (int) ((2 * basesRate + osDefenceRate) / 3);
 }

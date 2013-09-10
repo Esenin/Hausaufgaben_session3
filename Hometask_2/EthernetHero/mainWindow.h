@@ -18,8 +18,9 @@ public:
     ~MainWindow();
 
 private:
+    void keyPressEvent(QKeyEvent *event);
     Ui::MainWindow *ui;
-    GameLogic *gameKernel;
-    GameView viewport;
+    GameLogic *mGameKernel;
+    GameView mViewport;
 };
 

@@ -6,17 +6,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    setCentralWidget(&viewport);
+    setCentralWidget(&mViewport);
     showMaximized();
     setWindowTitle("EthernetHero the Game");
-    gameKernel = new GameLogic(&viewport);
+    mGameKernel = new GameLogic(&mViewport);
 
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
-    gameKernel->startGame();
+    mGameKernel->startGame();
+    mViewport.setFocus();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+    {
+        mGameKernel->startGame();
+    }
 }

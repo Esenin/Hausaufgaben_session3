@@ -11,7 +11,7 @@ GameLogic::GameLogic(GameView *viewport)
     connect(&stepTimer, SIGNAL(timeout()), this, SLOT(stepTimerEvent()));
 }
 
-void GameLogic::setupNewNetwork()
+void GameLogic::setupNewComputers()
 {
     if (mAgent)
     {
@@ -23,10 +23,12 @@ void GameLogic::setupNewNetwork()
     mAgent = new WorkStation(hacker);
     mView->setItemToScene(mAgent);
     mAgent->setPos(scene.left() + 10, scene.center().y());
+    connect(this, SIGNAL(newWorkingDay()), mAgent, SLOT(dataTransfer()));
 
     mDevelopers = new WorkStation(target);
     mView->setItemToScene(mDevelopers);
     mDevelopers->setPos(scene.right() - 110, scene.center().y());
+    connect(mDevelopers, SIGNAL(secretDepartInfected()), this, SLOT(gameOver()));
 
     mUsersCount = (qrand() % (maxUsers - minUsers + 1)) + minUsers;
     for (int i = 0; i < mUsersCount; i++)
@@ -39,10 +41,9 @@ void GameLogic::setupNewNetwork()
         // dbl click event filter doesnt work on graphicsview items
         connect(this, SIGNAL(energyChanged(bool)), newStation, SLOT(energyChange(bool)));
         connect(newStation, SIGNAL(updated()), this, SLOT(setReloadTime()));
-
     }
 
-    setUsersToGrid();
+
 }
 
 void GameLogic::setUsersToGrid()
@@ -68,7 +69,17 @@ void GameLogic::setUsersToGrid()
 
 void GameLogic::createNetworkConnection()
 {
+    QSet<WorkStation *> neighbours = getNeighbours(mainConnectionCount, mAgent);
+    mAgent->connectWith(neighbours);
 
+    neighbours = getNeighbours(mainConnectionCount, mDevelopers);
+    mDevelopers->connectWith(neighbours);
+
+    foreach (WorkStation *station, mUsers)
+    {
+        neighbours = getNeighbours(mainConnectionCount - 1, station);
+        station->connectWith(neighbours);
+    }
 }
 
 void GameLogic::deletePreviousStations()
@@ -80,6 +91,27 @@ void GameLogic::deletePreviousStations()
     mUsers.clear();
 }
 
+QSet<WorkStation *> GameLogic::getNeighbours(int const count, WorkStation *self)
+{
+    QList<WorkStation *> computers = mUsers;
+    QSet<WorkStation *> result;
+    while (result.size() < count)
+    {
+        WorkStation* const station = computers.at(qrand() % computers.size());
+        if (station != self)
+            result << station;
+    }
+    return result;
+}
+
+void GameLogic::makeLinks()
+{
+    foreach (WorkStation *station, mUsers)
+    {
+        mView->drawLinks(station, station->connected());
+    }
+}
+
 void GameLogic::makeNextMove()
 {
     researchNewViruses();
@@ -89,8 +121,14 @@ void GameLogic::makeNextMove()
 void GameLogic::startGame()
 {
     qDebug() << "start new session";
-    setupNewNetwork();
+    mView->clear();
+    setupNewComputers();
+    setUsersToGrid();
+    createNetworkConnection();
+    makeLinks();
     stepTimer.start(stepTime);
+
+    qDebug() << "Network users count: " << mUsersCount;
 }
 
 void GameLogic::stopGame()
@@ -104,9 +142,15 @@ void GameLogic::setReloadTime()
     emit energyChanged(false);
 }
 
+void GameLogic::gameOver()
+{
+    stopGame();
+    mView->showGameOverMsg();
+}
+
 void GameLogic::researchNewViruses()
 {
-    int const maxVirusesPercentage = 8;
+    int const maxVirusesPercentage = 4;
     for (int i = 0; i < mUsers.count(); i++)
     {
         mUsers.at(i)->decBases(qrand() % maxVirusesPercentage);

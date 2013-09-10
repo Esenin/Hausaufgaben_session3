@@ -4,6 +4,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QPainter>
+#include <QSet>
+#include <QDebug>
 
 enum StationType
 {
@@ -22,10 +24,14 @@ public:
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     QPointF incomingPort() const;
-    QPointF outcomingPort() const;
+    QPointF portPos() const;
 
     void decBases(int const outdated);
     void connectWith(WorkStation *station);
+    void connectWith(QSet<WorkStation *> const list);
+    QSet<WorkStation *> connected() const;
+
+    QString name();
 
 
 public slots:
@@ -34,6 +40,7 @@ public slots:
 
 signals:
     void updated();
+    void secretDepartInfected();
 
 protected:
     enum OperationSystems
@@ -51,16 +58,16 @@ protected:
     int calcDefenceRate(OperationSystems const osType, int const basesRate);
 
 private:
-
-
     OperationSystems mOperationSystem;
     StationType mStationType;
     qreal mBasesActuality;
     bool mInfected;
     QString mName;
     QRectF mBoundingRect;
+    QPointF mPort;
     bool mCouldBeUpdated;
-    QList<WorkStation *> mConnected;
+    bool mSkipOneDay;
+    QSet<WorkStation *> mConnected;
 };
 
 

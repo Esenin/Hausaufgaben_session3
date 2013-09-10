@@ -14,6 +14,7 @@ public slots:
     void startGame();
     void stopGame();
     void setReloadTime();
+    void gameOver();
 
 signals:
     void newWorkingDay();
@@ -21,19 +22,23 @@ signals:
 
 protected:
     void researchNewViruses();
-    void setupNewNetwork();
+    void setupNewComputers();
     void setUsersToGrid();
     void createNetworkConnection();
     void deletePreviousStations();
+    QSet<WorkStation *> getNeighbours(int const count, WorkStation *self);
+    void makeLinks();
+
 
 private:
     //! Time for step in ms
-    static const int stepTime = 1000;
+    static const int stepTime = 1500;
 
     //! Time to reload updates ability
-    static const int trafficReloadTime = 8;
-    static const int maxUsers = 12;
-    static const int minUsers = 5;
+    static int const trafficReloadTime = 1;
+    static int const maxUsers = 6;
+    static int const minUsers = 4;
+    static int const mainConnectionCount = 3;
     QTimer stepTimer;
     GameView *mView;
     QList<WorkStation *> mUsers;
