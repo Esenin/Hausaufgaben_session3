@@ -1,11 +1,12 @@
 #pragma once
 
-#include <QMainWindow>
+#include <QtWidgets/QMainWindow>
 
 #include "gameView.h"
 #include "gameLogic.h"
 
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 

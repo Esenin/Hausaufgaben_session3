@@ -1,11 +1,11 @@
 #include "workStation.h"
 
-
+using namespace stations;
 
 WorkStation::WorkStation(StationType const stationType)
-    : mBoundingRect(QRectF(0,0, 100, 160))
+    : mStationType(stationType)
+    , mBoundingRect(QRectF(0,0, 100, 160))
     , mCouldBeUpdated(true)
-    , mStationType(stationType)
     , mSkipOneDay(false)
 {
     initSocialPos(stationType);
@@ -179,7 +179,7 @@ void WorkStation::initSocialPos(const StationType stationType)
     loadFromFile(&nameList);
     mName = nameList.at(qrand() % nameList.size());
     mOperationSystem = (OperationSystems) ((qrand() % osCount) + debian);
-    mBasesActuality = 99 - (qrand() % 20);
+    mBasesActuality = 100 - (qrand() % 10);
     mInfected = false;
 }
 
@@ -206,7 +206,6 @@ void WorkStation::getVirus()
     mSkipOneDay = true;
     mBasesActuality = 0;
     update(mBoundingRect);
-
 }
 
 int WorkStation::calcDefenceRate(const WorkStation::OperationSystems osType, const int basesRate)

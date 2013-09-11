@@ -31,7 +31,6 @@ void GameView::drawLinks(WorkStation *start, QSet<WorkStation *> const connected
         QPointF startPoint(leftSide->portPos().x() + horShift, leftSide->portPos().y());
         QPointF finishPoint(rightSide->portPos().x() - horShift, rightSide->portPos().y());
 
-
         QLineF toPool(startPoint, QPointF(startPoint.x(), curPool));
         QLineF horizontPool(toPool.p2(), QPointF(finishPoint.x(), curPool));
         QLineF toTarget(horizontPool.p2(), finishPoint);
@@ -52,13 +51,16 @@ void GameView::clear()
     foreach (QGraphicsItem *item, mScene->items())
     {
         QGraphicsLineItem *curLine = qgraphicsitem_cast<QGraphicsLineItem *>(item);
-        if (curLine == NULL) {
+        if (curLine == NULL)
+        {
             continue;
         }
         mScene->removeItem(curLine);
     }
     if (mGameOverText->scene() == mScene)
+    {
         mScene->removeItem(mGameOverText);
+    }
 }
 
 void GameView::setScoresText(const QString scoresText)
@@ -98,21 +100,22 @@ void GameView::initGraphicsOutput()
     setRenderHint(QPainter::Antialiasing);
     setMinimumSize(960, 520);
 
+    setFont(QFont("Courier New"));
+
     mGameOverText = new QGraphicsTextItem("Game Over! \nYou can restart game by pressing Esc");
-    mGameOverText->setFont(QFont("Tahoma", 34));
+    mGameOverText->setFont(QFont("Courier New", 34));
     mGameOverText->setZValue(mGameOverText->zValue() + 1);
     mGameOverText->setPos(mScene->sceneRect().center().x() - mScene->width() / 3
             , mScene->sceneRect().center().y() + mScene->height() / 4);
 
     mScoreText = new QGraphicsTextItem("Scores per step:\nTotal scores:\nReloading Time:");
     mScoreText->setPos(QPointF(mScene->sceneRect().left() + mScoreText->font().pointSize()
-            ,mScene->sceneRect().top() + mScene->height() / 3));
+            , mScene->sceneRect().center().y() - mScene->height() / 4));
     mScene->addItem(mScoreText);
 
-    QString helpInfo = QString("Prevent hackers attack to main server!\n") +
-            QString("Use mouse double click to heal computer!\nPress Esc for restart.\n'God' Luck!");
+    QString helpInfo = QString("Prevent hackers attack to main server!\n")
+            + QString("Use mouse double click to heal computer!\nPress Esc for restart.\n'God' Luck!");
     mInfoMessage = new QGraphicsTextItem(helpInfo);
-    mInfoMessage->setFont(QFont("Tahoma", 10));
     mInfoMessage->setPos(mScene->sceneRect().topLeft());
     mScene->addItem(mInfoMessage);
 }
@@ -123,7 +126,6 @@ qreal GameView::calcPoolLevel(WorkStation const *first, WorkStation const *secon
     qreal const shift = second->pos().x() / (first->pos().x() + first->boundingRect().width());
     qreal const startPoolHeight = first->boundingRect().height();
     return startPoolHeight + stepPx * shift;
-
 }
 
 qreal GameView::calcPortXShift(WorkStation const *first, WorkStation const *second) const

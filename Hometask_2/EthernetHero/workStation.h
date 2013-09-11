@@ -1,39 +1,45 @@
 #pragma once
 
-#include <QGraphicsItem>
-#include <QFile>
-#include <QTextStream>
-#include <QPainter>
-#include <QSet>
-#include <QDebug>
+#include <QtWidgets/QGraphicsItem>
+#include <QtCore/QFile>
+#include <QtCore/QTextStream>
+#include <QtGui/QPainter>
+#include <QtCore/QSet>
 
+namespace stations
+{
 enum StationType
 {
     hacker = 0
     , user
     , target
 };
+}
 
-
+//! @class WorkStation is model of desktop workstation in local network
 class WorkStation : public QObject, public QGraphicsItem
 {
     Q_OBJECT
+    Q_INTERFACES(QGraphicsItem)
 public:
-    explicit WorkStation(StationType const stationType = user);
+    explicit WorkStation(stations::StationType const stationType = stations::user);
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, QStyleOptionGraphicsItem const *option, QWidget *widget);
-    QPointF incomingPort() const;
+    //! on-scene position of station's incoming,outcoming port
     QPointF portPos() const;
 
+    //! decrease database actuality
     void decBases(int const outdated);
+    //! feedback-connection
     void connectWith(WorkStation *station);
+    //! connects this station with @arg list stations
     void connectWith(QSet<WorkStation *> const list);
+
     QSet<WorkStation *> connected() const;
     bool isInfected() const;
     int basesActuality() const;
     QString name() const;
-
 
 public slots:
     void energyChange(bool const canUpdate);
@@ -53,14 +59,16 @@ protected:
         ,winXP
     };
     void loadFromFile(QStringList* list);
-    void initSocialPos(StationType const stationType);
+    //! configures stations params
+    void initSocialPos(stations::StationType const stationType);
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    //! makes station infected
     void getVirus();
     int calcDefenceRate(OperationSystems const osType, int const basesRate);
 
 private:
     OperationSystems mOperationSystem;
-    StationType mStationType;
+    stations::StationType mStationType;
     int mBasesActuality;
     bool mInfected;
     QString mName;

@@ -1,13 +1,13 @@
 #include "gameLogic.h"
 
 GameLogic::GameLogic(GameView *viewport)
-    : mView(viewport)
+    : trafficReloadTime(1)
+     ,mView(viewport)
     , mAgent(NULL)
     , mDevelopers(NULL)
+    , mScores(0)
     , mUsersCount(0)
     , mTimeForReload(0)
-    , trafficReloadTime(1)
-    , mScores(0)
 {
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
     connect(&stepTimer, SIGNAL(timeout()), this, SLOT(stepTimerEvent()));
@@ -16,14 +16,14 @@ GameLogic::GameLogic(GameView *viewport)
 void GameLogic::setupNewComputers()
 {
     QRectF const scene = mView->sceneRect();
-    mAgent = new WorkStation(hacker);
+    mAgent = new WorkStation(stations::hacker);
     mView->setItemToScene(mAgent);
-    mAgent->setPos(scene.left() + 10, scene.center().y());
+    mAgent->setPos(scene.right() - 110, scene.center().y());
     connect(this, SIGNAL(newWorkingDay()), mAgent, SLOT(dataTransfer()));
 
-    mDevelopers = new WorkStation(target);
-    mView->setItemToScene(mDevelopers);
-    mDevelopers->setPos(scene.right() - 110, scene.center().y());
+    mDevelopers = new WorkStation(stations::target);
+    mView->setItemToScene(mDevelopers);    
+    mDevelopers->setPos(scene.left() + 10, scene.center().y() - scene.height() / 10);
     connect(mDevelopers, SIGNAL(secretDepartInfected()), this, SLOT(gameOver()));
 
     mUsersCount = (qrand() % (maxUsers - minUsers + 1)) + minUsers;
@@ -36,7 +36,7 @@ void GameLogic::setupNewComputers()
 
         // dbl click event filter doesnt work on graphicsview items
         connect(this, SIGNAL(energyChanged(bool)), newStation, SLOT(energyChange(bool)));
-        connect(newStation, SIGNAL(updated()), this, SLOT(setReloadTime()));
+        connect(newStation, SIGNAL(updated()), this, SLOT(startReloadTime()));
     }
 
     trafficReloadTime = (mUsersCount < maxUsers / 2)? 2 : 1;
@@ -53,7 +53,7 @@ void GameLogic::setUsersToGrid()
         station->setPos(xPos, yPos);
 
         xPos += station->boundingRect().width() + hSpace;
-        if (xPos > mDevelopers->x() - station->boundingRect().width())
+        if (xPos > mAgent->x() - station->boundingRect().width())
         {
             xPos = 0;
             yPos += station->boundingRect().height() + vSpace;
@@ -63,15 +63,15 @@ void GameLogic::setUsersToGrid()
 
 void GameLogic::createNetworkConnection()
 {
-    QSet<WorkStation *> neighbours = getNeighbours(mainConnectionCount, mAgent);
+    QSet<WorkStation *> neighbours = findNewNeighbours(mainConnectionCount, mAgent);
     mAgent->connectWith(neighbours);
 
-    neighbours = getNeighbours(mainConnectionCount, mDevelopers);
+    neighbours = findNewNeighbours(mainConnectionCount, mDevelopers);
     mDevelopers->connectWith(neighbours);
 
     foreach (WorkStation *station, mUsers)
     {
-        neighbours = getNeighbours(mainConnectionCount - 1, station);
+        neighbours = findNewNeighbours(mainConnectionCount - 1, station);
         station->connectWith(neighbours);
     }
 }
@@ -85,7 +85,7 @@ void GameLogic::deletePreviousStations()
     mUsers.clear();
 }
 
-QSet<WorkStation *> GameLogic::getNeighbours(int const count, WorkStation *self)
+QSet<WorkStation *> GameLogic::findNewNeighbours(int const count, WorkStation *self)
 {
     QList<WorkStation *> computers = mUsers;
     QSet<WorkStation *> result;
@@ -109,7 +109,7 @@ void GameLogic::makeLinks()
 void GameLogic::makeNextMove()
 {
     researchNewViruses();
-    addScores();
+    updateScores();
     emit newWorkingDay();
 }
 
@@ -129,7 +129,7 @@ void GameLogic::stopGame()
     stepTimer.stop();
 }
 
-void GameLogic::setReloadTime()
+void GameLogic::startReloadTime()
 {
     mTimeForReload = trafficReloadTime;
     emit energyChanged(false);
@@ -150,7 +150,7 @@ void GameLogic::researchNewViruses()
     }
 }
 
-void GameLogic::addScores()
+void GameLogic::updateScores()
 {
     int const newRoundRate = scoresRate();
     mScores += newRoundRate;
@@ -168,12 +168,16 @@ int GameLogic::scoresRate()
     foreach (WorkStation *station, mUsers)
     {
         if (station->isInfected())
+        {
             noInfected = false;
+        }
         rate += (maxActuality - station->basesActuality()) / 2;
     }
     rate += (maxActuality - mDevelopers->basesActuality()) * 2;
     if (noInfected)
+    {
         rate += 5 * maxActuality;
+    }
 
     return rate;
 }
@@ -185,7 +189,6 @@ void GameLogic::clearField()
         delete mAgent;
         delete mDevelopers;
         deletePreviousStations();
-
     }
     mView->clear();
 }
