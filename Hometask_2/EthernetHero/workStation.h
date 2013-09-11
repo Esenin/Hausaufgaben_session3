@@ -22,7 +22,7 @@ public:
     explicit WorkStation(StationType const stationType = user);
 
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void paint(QPainter *painter, QStyleOptionGraphicsItem const *option, QWidget *widget);
     QPointF incomingPort() const;
     QPointF portPos() const;
 
@@ -30,8 +30,9 @@ public:
     void connectWith(WorkStation *station);
     void connectWith(QSet<WorkStation *> const list);
     QSet<WorkStation *> connected() const;
-
-    QString name();
+    bool isInfected() const;
+    int basesActuality() const;
+    QString name() const;
 
 
 public slots:
@@ -60,7 +61,7 @@ protected:
 private:
     OperationSystems mOperationSystem;
     StationType mStationType;
-    qreal mBasesActuality;
+    int mBasesActuality;
     bool mInfected;
     QString mName;
     QRectF mBoundingRect;

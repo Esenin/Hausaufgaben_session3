@@ -21,30 +21,34 @@ signals:
     void energyChanged(bool);
 
 protected:
-    void researchNewViruses();
     void setupNewComputers();
     void setUsersToGrid();
     void createNetworkConnection();
-    void deletePreviousStations();
-    QSet<WorkStation *> getNeighbours(int const count, WorkStation *self);
     void makeLinks();
+    void deletePreviousStations();
+    void researchNewViruses();
+    void addScores();
+    int scoresRate();
+    void clearField();
+    QSet<WorkStation *> getNeighbours(int const count, WorkStation *self);
+
 
 
 private:
     //! Time for step in ms
     static const int stepTime = 1500;
 
-    //! Time to reload updates ability
-    static int const trafficReloadTime = 1;
     static int const maxUsers = 12;
     static int const minUsers = 4;
     static int const mainConnectionCount = 3;
+    //! Time to reload updates ability
+    int trafficReloadTime;
     QTimer stepTimer;
     GameView *mView;
     QList<WorkStation *> mUsers;
     WorkStation *mAgent;
     WorkStation *mDevelopers;
-    int mScores;
+    unsigned int mScores;
 
 
     int mUsersCount;

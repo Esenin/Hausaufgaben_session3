@@ -10,7 +10,6 @@ WorkStation::WorkStation(StationType const stationType)
 {
     initSocialPos(stationType);
     mConnected.clear();
-    int const boundPx = 10;
     mPort = mBoundingRect.center();
 }
 
@@ -19,7 +18,7 @@ QRectF WorkStation::boundingRect() const
     return mBoundingRect;
 }
 
-void WorkStation::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void WorkStation::paint(QPainter *painter, QStyleOptionGraphicsItem const *option, QWidget *widget)
 {
     QRectF bounds = mBoundingRect;
     painter->fillRect(bounds, (mInfected)? Qt::red : Qt::yellow);
@@ -55,6 +54,9 @@ void WorkStation::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     QStringList osNames;
     osNames << "backTrack" << "debian" << "ubuntu" << "windows7" << "winXP";
     painter->drawText(xPos, yPos, QString("OS: " + osNames.at(mOperationSystem - backTrack)));
+
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
 }
 
 QPointF WorkStation::portPos() const
@@ -89,7 +91,17 @@ QSet<WorkStation *> WorkStation::connected() const
     return mConnected;
 }
 
-QString WorkStation::name()
+bool WorkStation::isInfected() const
+{
+    return mInfected;
+}
+
+int WorkStation::basesActuality() const
+{
+    return mBasesActuality;
+}
+
+QString WorkStation::name() const
 {
     return mName;
 }
@@ -110,11 +122,14 @@ void WorkStation::dataTransfer()
         return;
     }
 
+    int const damagePerAttak = 1;
     foreach (WorkStation *station, mConnected)
     {
         int const attackPerfomance = qrand() % 100;
         if (attackPerfomance > calcDefenceRate(station->mOperationSystem, station->mBasesActuality))
             station->getVirus();
+        else
+            station->decBases(damagePerAttak);
     }
 }
 
@@ -148,7 +163,7 @@ void WorkStation::initSocialPos(const StationType stationType)
     {
         mName = "R&D server";
         mOperationSystem = debian;
-        mBasesActuality = 98;
+        mBasesActuality = 100;
         mInfected = false;
         break;
     }

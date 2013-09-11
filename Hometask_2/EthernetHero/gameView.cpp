@@ -14,7 +14,7 @@ void GameView::setItemToScene(QGraphicsItem *item)
 
 void GameView::drawLinks(WorkStation *start, QSet<WorkStation *> const connected)
 {
-    QPen color(Qt::yellow);
+    QPen color(Qt::darkGray);
     foreach (WorkStation *station, connected)
     {
         if (start->pos().y() != station->pos().y())
@@ -57,7 +57,13 @@ void GameView::clear()
         }
         mScene->removeItem(curLine);
     }
-    mScene->removeItem(mGameOverText);
+    if (mGameOverText->scene() == mScene)
+        mScene->removeItem(mGameOverText);
+}
+
+void GameView::setScoresText(const QString scoresText)
+{
+    mScoreText->setPlainText(scoresText);
 }
 
 void GameView::drawBackground(QPainter *painter, const QRectF &rect)
@@ -93,17 +99,22 @@ void GameView::initGraphicsOutput()
     setMinimumSize(960, 520);
 
     mGameOverText = new QGraphicsTextItem("Game Over! \nYou can restart game by pressing Esc");
-    mGameOverText->setFont(QFont("Tahoma", 30));
-    mGameOverText->setDefaultTextColor(Qt::white);
+    mGameOverText->setFont(QFont("Tahoma", 34));
     mGameOverText->setZValue(mGameOverText->zValue() + 1);
-    mGameOverText->setPos(mScene->sceneRect().center() - QPoint((mScene->width() / 3), 0));
+    mGameOverText->setPos(mScene->sceneRect().center().x() - mScene->width() / 3
+            , mScene->sceneRect().center().y() + mScene->height() / 4);
+
+    mScoreText = new QGraphicsTextItem("Scores per step:\nTotal scores:\nReloading Time:");
+    mScoreText->setPos(QPointF(mScene->sceneRect().left() + mScoreText->font().pointSize()
+            ,mScene->sceneRect().top() + mScene->height() / 3));
+    mScene->addItem(mScoreText);
 
     QString helpInfo = QString("Prevent hackers attack to main server!\n") +
-            QString("Use mouse double click to heal computer!\n 'God' Luck!");
+            QString("Use mouse double click to heal computer!\nPress Esc for restart.\n'God' Luck!");
     mInfoMessage = new QGraphicsTextItem(helpInfo);
     mInfoMessage->setFont(QFont("Tahoma", 10));
-    mScene->addItem(mInfoMessage);
     mInfoMessage->setPos(mScene->sceneRect().topLeft());
+    mScene->addItem(mInfoMessage);
 }
 
 qreal GameView::calcPoolLevel(WorkStation const *first, WorkStation const *second) const

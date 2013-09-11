@@ -6,6 +6,7 @@ GameLogic::GameLogic(GameView *viewport)
     , mDevelopers(NULL)
     , mUsersCount(0)
     , mTimeForReload(0)
+    , trafficReloadTime(1)
     , mScores(0)
 {
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
@@ -14,12 +15,6 @@ GameLogic::GameLogic(GameView *viewport)
 
 void GameLogic::setupNewComputers()
 {
-    if (mAgent)
-    {
-        delete mAgent;
-        delete mDevelopers;
-        deletePreviousStations();
-    }
     QRectF const scene = mView->sceneRect();
     mAgent = new WorkStation(hacker);
     mView->setItemToScene(mAgent);
@@ -43,6 +38,8 @@ void GameLogic::setupNewComputers()
         connect(this, SIGNAL(energyChanged(bool)), newStation, SLOT(energyChange(bool)));
         connect(newStation, SIGNAL(updated()), this, SLOT(setReloadTime()));
     }
+
+    trafficReloadTime = (mUsersCount < maxUsers / 2)? 2 : 1;
 }
 
 void GameLogic::setUsersToGrid()
@@ -62,8 +59,6 @@ void GameLogic::setUsersToGrid()
             yPos += station->boundingRect().height() + vSpace;
         }
     }
-
-    qDebug() << "deployed to grid";
 }
 
 void GameLogic::createNetworkConnection()
@@ -114,20 +109,19 @@ void GameLogic::makeLinks()
 void GameLogic::makeNextMove()
 {
     researchNewViruses();
+    addScores();
     emit newWorkingDay();
 }
 
 void GameLogic::startGame()
 {
-    qDebug() << "start new session";
-    mView->clear();
+    clearField();
+    mScores = 0;
     setupNewComputers();
     setUsersToGrid();
     createNetworkConnection();
     makeLinks();
     stepTimer.start(stepTime);
-
-    qDebug() << "Network users count: " << mUsersCount;
 }
 
 void GameLogic::stopGame()
@@ -154,6 +148,46 @@ void GameLogic::researchNewViruses()
     {
         mUsers.at(i)->decBases(qrand() % maxVirusesPercentage);
     }
+}
+
+void GameLogic::addScores()
+{
+    int const newRoundRate = scoresRate();
+    mScores += newRoundRate;
+    QString scoresText = "Scores per step: " + QString::number(newRoundRate)
+            + "\nTotal scores: " + QString::number(mScores)
+            + "\nReloading time: " + QString::number(trafficReloadTime) + " steps!";
+    mView->setScoresText(scoresText);
+}
+
+int GameLogic::scoresRate()
+{
+    int const maxActuality = 100;
+    bool noInfected = true;
+    int rate = 0;
+    foreach (WorkStation *station, mUsers)
+    {
+        if (station->isInfected())
+            noInfected = false;
+        rate += (maxActuality - station->basesActuality()) / 2;
+    }
+    rate += (maxActuality - mDevelopers->basesActuality()) * 2;
+    if (noInfected)
+        rate += 5 * maxActuality;
+
+    return rate;
+}
+
+void GameLogic::clearField()
+{
+    if (mAgent)
+    {
+        delete mAgent;
+        delete mDevelopers;
+        deletePreviousStations();
+
+    }
+    mView->clear();
 }
 
 void GameLogic::stepTimerEvent()

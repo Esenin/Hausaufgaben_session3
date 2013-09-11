@@ -17,6 +17,7 @@ public:
     void drawLinks(WorkStation *start, QSet<WorkStation *> const connected);
     void showGameOverMsg();
     void clear();
+    void setScoresText(QString const scoresText);
 
 protected:
     void drawBackground(QPainter *painter, const QRectF &rect);
