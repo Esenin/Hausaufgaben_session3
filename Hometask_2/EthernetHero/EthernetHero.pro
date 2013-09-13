@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui testlib
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -22,7 +22,10 @@ HEADERS  += \
     workStation.h \
     gameView.h \
     gameLogic.h \
-    mainWindow.h
+    mainWindow.h \
+    tests/testWorkStation.h \
+    tests/testGameLogic.h \
+    tests/testGameViewport.h
 
 FORMS    += MainWindow.ui
 
