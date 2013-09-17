@@ -7,6 +7,6 @@ QT += testlib
 SOURCES += src/main.cpp
 
 HEADERS += \
-    arrayChecker.h \
+    src/arrayChecker.h \
     test/testArrayChecker.h
 
