@@ -1,14 +1,17 @@
 #include "graph.h"
 
 Graph::Graph(QString const filename)
-    : QObject()
-    , mVertexCount(-1)
+    : mVertexCount(-1)
 {
     loadMatrixFromFile(filename);
-    for (int i = 0; i < mRobots.size(); i++)
-        mResult.append(false);
+    clearResult();
+}
 
-    qDebug() << mAdjacencyList;
+Graph::Graph(QStringList stringList)
+    : mVertexCount(-1)
+{
+    setupMatrix(stringList);
+    clearResult();
 }
 
 bool Graph::findMeetProbability()
@@ -24,18 +27,23 @@ bool Graph::findMeetProbability()
     return !mResult.contains(false);
 }
 
-void Graph::loadMatrixFromFile(QString const filename)
+void Graph::clearResult()
 {
-    QFile file(filename);
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
-    QTextStream input(&file);
+    for (int i = 0; i < mRobots.size(); i++)
+        mResult.append(false);
+}
+
+void Graph::setupMatrix(QStringList stringList)
+{
     bool hasFoundSize = false;
     int rowNum = 0;
     QList<int> buff;
 
-    while (!input.atEnd())
+    while (!stringList.isEmpty())
     {
-        buff = parseLine(input.readLine().simplified());
+        buff = parseLine(stringList.first().simplified());
+        stringList.removeFirst();
+
         if (buff.size() == 0)
             continue;
 
@@ -57,7 +65,20 @@ void Graph::loadMatrixFromFile(QString const filename)
             break;
         }
     }
+}
+
+void Graph::loadMatrixFromFile(QString const filename)
+{
+    QFile file(filename);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream inputText(&file);
+    QStringList buffer;
+    while (!inputText.atEnd())
+    {
+        buffer << inputText.readLine();
+    }
     file.close();
+    setupMatrix(buffer);
 }
 
 QList<int> Graph::parseLine(QString const string) throw(InputError)
