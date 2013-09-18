@@ -14,15 +14,7 @@
 class GraphProblemTest : public QObject
 {
     Q_OBJECT
-public:
-    GraphProblemTest()
-    {
-        answers = "110";
-    }
-
 private:
-    QString answers;
-
     bool tryTest(QStringList &list)
     {
         bool result = false;
@@ -48,7 +40,6 @@ private slots:
         Q_ASSERT(!mStream.atEnd());
         QString line;
 
-        int testNum = 0;
         do
         {
             line.clear();
@@ -60,8 +51,7 @@ private slots:
                     singleTestList << line;
             }
             while(!line.contains("_"));
-            QCOMPARE(tryTest(singleTestList), (answers[testNum] == '1'));
-            testNum++;
+            QCOMPARE(tryTest(singleTestList), (line.toLower().contains("true")));
         }
         while (!line.contains("EOTestPack"));
         file.close();
