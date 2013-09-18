@@ -37,7 +37,7 @@ protected:
     QList<int> parseLine(QString const string) throw(InputError);
     //!
     //! \brief dfsModified
-    //! checks out that one robot can kill others
+    //! finds robots path decomposition from fix point of view
     void dfsModified(int const startVertex, QList<int> used, int const deepLevel = 0);
     void correction(int &even, int &odd);
 
@@ -46,6 +46,6 @@ private:
     static int const oddBit = 2;
     QList<QList<int> > mAdjacencyList;
     QList<int> mRobots;
-    QList<int> mResult;
+    QList<char> mRobotsDecomposition;
     int mVertexCount;
 };

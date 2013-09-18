@@ -23,7 +23,7 @@ bool Graph::findMeetProbability()
 
     int even = 0;
     int odd = 0;
-    foreach (int const configuration, mResult)
+    foreach (int const configuration, mRobotsDecomposition)
     {
         even += configuration & evenBit;
         odd += (configuration & oddBit) / 2;
@@ -34,10 +34,10 @@ bool Graph::findMeetProbability()
 
 void Graph::clearResult()
 {
-    mResult.clear();
+    mRobotsDecomposition.clear();
     for (int i = 0; i < mRobots.size(); i++)
     {
-        mResult.append(0);
+        mRobotsDecomposition.append(0);
     }
 }
 
@@ -98,7 +98,8 @@ QList<int> Graph::parseLine(QString const string) throw(InputError)
     QList<int> numList;
 
     int pos = 0;
-    while ((pos = regExp.indexIn(string, pos)) != -1) {
+    while ((pos = regExp.indexIn(string, pos)) != -1)
+    {
          numList << regExp.cap(1).toInt();
          pos += regExp.matchedLength();
 
@@ -116,13 +117,13 @@ void Graph::dfsModified(int const startVertex, QList<int> used, int const deepLe
         int const resultIndex = mRobots.indexOf(startVertex);
         if (deepLevel % 2 == 0)
         {
-            if ((mResult[resultIndex] & evenBit) == 0)
-                mResult[resultIndex] = mResult[resultIndex] | evenBit;
+            if ((mRobotsDecomposition[resultIndex] & evenBit) == 0)
+                mRobotsDecomposition[resultIndex] = mRobotsDecomposition[resultIndex] | evenBit;
         }
         else
         {
-            if ((mResult[resultIndex] & oddBit) == 0)
-                mResult[resultIndex] = mResult[resultIndex] | oddBit;
+            if ((mRobotsDecomposition[resultIndex] & oddBit) == 0)
+                mRobotsDecomposition[resultIndex] = mRobotsDecomposition[resultIndex] | oddBit;
         }
     }
 
@@ -141,7 +142,7 @@ void Graph::correction(int &even, int &odd)
     if (even != 1 && odd != 1)
         return;
 
-    foreach (int const config, mResult)
+    foreach (int const config, mRobotsDecomposition)
     {
         if ((even == 1) && (config & evenBit))
         {
