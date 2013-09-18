@@ -39,10 +39,13 @@ protected:
     //! \brief dfsModified
     //! checks out that one robot can kill others
     void dfsModified(int const startVertex, QList<int> used, int const deepLevel = 0);
+    void correction(int &even, int &odd);
 
 private:
+    static int const evenBit = 1;
+    static int const oddBit = 2;
     QList<QList<int> > mAdjacencyList;
     QList<int> mRobots;
-    QList<bool> mResult;
+    QList<int> mResult;
     int mVertexCount;
 };

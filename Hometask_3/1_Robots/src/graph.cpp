@@ -17,20 +17,28 @@ Graph::Graph(QStringList stringList)
 bool Graph::findMeetProbability()
 {
     QList<int> used;
-    foreach (int const start, mRobots)
-    {
-        used.clear();
-        used.append(start);
-        dfsModified(start, used);
-    }
 
-    return !mResult.contains(false);
+    used.append(mRobots.first());
+    dfsModified(mRobots.first(), used);
+
+    int even = 0;
+    int odd = 0;
+    foreach (int const configuration, mResult)
+    {
+        even += configuration & evenBit;
+        odd += (configuration & oddBit) / 2;
+    }
+    correction(even, odd);
+    return (even != 1) && (odd != 1);
 }
 
 void Graph::clearResult()
 {
+    mResult.clear();
     for (int i = 0; i < mRobots.size(); i++)
-        mResult.append(false);
+    {
+        mResult.append(0);
+    }
 }
 
 void Graph::setupMatrix(QStringList stringList)
@@ -103,9 +111,19 @@ QList<int> Graph::parseLine(QString const string) throw(InputError)
 
 void Graph::dfsModified(int const startVertex, QList<int> used, int const deepLevel)
 {
-    if (deepLevel > 0 && (deepLevel % 2 == 0) && mRobots.contains(startVertex))
+    if (mRobots.contains(startVertex))
     {
-        mResult[mRobots.indexOf(startVertex)] = true;
+        int const resultIndex = mRobots.indexOf(startVertex);
+        if (deepLevel % 2 == 0)
+        {
+            if ((mResult[resultIndex] & evenBit) == 0)
+                mResult[resultIndex] = mResult[resultIndex] | evenBit;
+        }
+        else
+        {
+            if ((mResult[resultIndex] & oddBit) == 0)
+                mResult[resultIndex] = mResult[resultIndex] | oddBit;
+        }
     }
 
     foreach (int const next, mAdjacencyList[startVertex])
@@ -115,5 +133,27 @@ void Graph::dfsModified(int const startVertex, QList<int> used, int const deepLe
         used << next;
         dfsModified(next, used, deepLevel + 1);
         used.removeOne(next);
+    }
+}
+
+void Graph::correction(int &even, int &odd)
+{
+    if (even != 1 && odd != 1)
+        return;
+
+    foreach (int const config, mResult)
+    {
+        if ((even == 1) && (config & evenBit))
+        {
+            if ((config) & (oddBit))
+                even--;
+            break;
+        }
+        if ((odd == 1) && (config & oddBit))
+        {
+            if ((config) & (evenBit))
+                odd--;
+            break;
+        }
     }
 }
