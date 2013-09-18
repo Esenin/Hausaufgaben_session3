@@ -3,7 +3,7 @@
 template<typename Type>
 //!
 //! \brief The ArrayChecker class
-//! can check array for zero value
+//! calc zeros count in array
 class ArrayChecker
 {
 public:
@@ -13,14 +13,15 @@ public:
     {
     }
 
-    bool hasZeros() const
+    int zerosCount() const
     {
+        int result = 0;
         for (int i = 0; i < mSize; i++)
         {
             if (mArray[i] == 0)
-                return true;
+                result++;
         }
-        return false;
+        return result;
     }
 private:
     Type *mArray;

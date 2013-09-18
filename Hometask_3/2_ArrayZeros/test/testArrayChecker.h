@@ -3,7 +3,7 @@
 #include <QtCore/QObject>
 #include <QtTest/QTest>
 
-#include "arrayChecker.h"
+#include "../src/arrayChecker.h"
 
 
 class ArrayCheckerTest : public QObject
@@ -22,17 +22,17 @@ private slots:
 
     void randomTest()
     {
-        bool result = false;
+        int answer = 0;
         for (int i = 0; i < size; i++)
         {
             int newElement = qrand() % INT_MAX;
             mArray[i] = newElement;
             if (newElement == 0)
-                result = true;
+                answer++;
         }
 
         ArrayChecker<int> checker(mArray, size);
-        QCOMPARE(checker.hasZeros(), result);
+        QCOMPARE(checker.zerosCount(), answer);
     }
 
     void nonZerosTest()
@@ -41,10 +41,10 @@ private slots:
             mArray[i] = i + 1;
 
         ArrayChecker<int> checker(mArray, size);
-        QCOMPARE(checker.hasZeros(), false);
+        QCOMPARE(checker.zerosCount(), 0);
     }
 
-    void zerosTest()
+    void oneZeroTest()
     {
         for (int i = 0; i < size; i++)
             mArray[i] = i + 1;
@@ -52,7 +52,7 @@ private slots:
         mArray[size / 2] = 0;
 
         ArrayChecker<int> checker(mArray, size);
-        QCOMPARE(checker.hasZeros(), true);
+        QCOMPARE(checker.zerosCount(), 1);
     }
 
     void cleanup()
