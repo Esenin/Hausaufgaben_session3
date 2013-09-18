@@ -1,15 +1,15 @@
 #include "gameLogic.h"
 
-GameLogic::GameLogic(GameView *viewport)
-    : trafficReloadTime(1)
-     ,mView(viewport)
+GameLogic::GameLogic(GameView *viewport, PseudoRandomGenerator *generator)
+    : mGenerator(generator)
+    ,trafficReloadTime(1)
+    ,mView(viewport)
     , mAgent(NULL)
     , mDevelopers(NULL)
     , mScores(0)
     , mUsersCount(0)
     , mTimeForReload(0)
 {
-    qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
     connect(&stepTimer, SIGNAL(timeout()), this, SLOT(stepTimerEvent()));
 }
 
@@ -26,7 +26,7 @@ void GameLogic::setupNewComputers()
     mDevelopers->setPos(scene.left() + 10, scene.center().y() - scene.height() / 10);
     connect(mDevelopers, SIGNAL(secretDepartInfected()), this, SLOT(gameOver()));
 
-    mUsersCount = (qrand() % (maxUsers - minUsers + 1)) + minUsers;
+    mUsersCount = (mGenerator->rand() % (maxUsers - minUsers + 1)) + minUsers;
     for (int i = 0; i < mUsersCount; i++)
     {
         WorkStation *newStation = new WorkStation();
@@ -89,11 +89,12 @@ QSet<WorkStation *> GameLogic::findNewNeighbours(int const count, WorkStation *s
 {
     QList<WorkStation *> computers = mUsers;
     QSet<WorkStation *> result;
+    computers.removeOne(self);
     while (result.size() < count)
     {
-        WorkStation* const station = computers.at(qrand() % computers.size());
-        if (station != self)
-            result << station;
+        WorkStation* const station = computers.at(mGenerator->rand() % computers.size());
+        result << station;
+        computers.removeOne(station);
     }
     return result;
 }
@@ -146,7 +147,7 @@ void GameLogic::researchNewViruses()
     int const maxVirusesPercentage = 4;
     for (int i = 0; i < mUsers.count(); i++)
     {
-        mUsers.at(i)->decBases(qrand() % maxVirusesPercentage);
+        mUsers.at(i)->decBases(mGenerator->rand() % maxVirusesPercentage);
     }
 }
 

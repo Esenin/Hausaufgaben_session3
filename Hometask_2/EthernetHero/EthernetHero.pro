@@ -16,7 +16,7 @@ SOURCES += main.cpp\
     workStation.cpp \
     gameView.cpp \
     gameLogic.cpp \
-    mainWindow.cpp
+    mainWindow.cpp \
 
 HEADERS  += \
     workStation.h \
@@ -25,7 +25,10 @@ HEADERS  += \
     mainWindow.h \
     tests/testWorkStation.h \
     tests/testGameLogic.h \
-    tests/testGameViewport.h
+    tests/testGameViewport.h \
+    pseudoRandomGenerator.h \
+    liveRandGenerator.h \
+    tests/testRandomGenerator.h
 
 FORMS    += MainWindow.ui
 

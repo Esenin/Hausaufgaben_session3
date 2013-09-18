@@ -3,6 +3,7 @@
 #include <QtCore/QObject>
 #include <QtTest/QTest>
 
+#include "testRandomGenerator.h"
 #include "gameLogic.h"
 #include "gameView.h"
 
@@ -13,12 +14,14 @@ class GameLogicTest : public QObject
 private:
     GameView *mView;
     GameLogic *mLogic;
+    TestRandomGenerator *mGenerator;
 
 private slots:
     void initTestCase()
     {
+        mGenerator = new TestRandomGenerator();
         mView = new GameView();
-        mLogic = new GameLogic(mView);
+        mLogic = new GameLogic(mView, mGenerator);
     }
 
     void commonTest()
@@ -49,5 +52,6 @@ private slots:
         mLogic->stopGame();
         delete mLogic;
         delete mView;
+        delete mGenerator;
     }
 };

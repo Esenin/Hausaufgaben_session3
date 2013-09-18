@@ -10,7 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
     showMaximized();
     setWindowTitle("EthernetHero the Game");
 
-    mGameKernel = new GameLogic(&mViewport);
+    mGenerator = new TestRandomGenerator();
+    mGameKernel = new GameLogic(&mViewport, mGenerator);
 
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -21,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete mGenerator;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

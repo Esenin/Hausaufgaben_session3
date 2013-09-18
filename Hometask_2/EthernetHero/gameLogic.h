@@ -1,7 +1,9 @@
 #pragma once
 
+#include "pseudoRandomGenerator.h"
 #include "gameView.h"
 #include "workStation.h"
+
 
 //! @class GameLogic provides action control and checks current game status
 class GameLogic : public QObject
@@ -9,7 +11,7 @@ class GameLogic : public QObject
     Q_OBJECT
 public:
     //! @arg viewport game field
-    explicit GameLogic(GameView  *viewport);
+    explicit GameLogic(GameView  *viewport, PseudoRandomGenerator *generator);
 
 public slots:
     void startGame();
@@ -51,6 +53,7 @@ private:
     static int const minUsers = 4;
     //! connection ability for any computer
     static int const mainConnectionCount = 3;
+    PseudoRandomGenerator *mGenerator;
     //! Time to reload updates ability
     int trafficReloadTime;
     QTimer stepTimer;
