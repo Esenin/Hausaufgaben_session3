@@ -13,23 +13,32 @@ GameLogic::GameLogic(GameView *viewport, PseudoRandomGenerator *generator)
     connect(&stepTimer, SIGNAL(timeout()), this, SLOT(stepTimerEvent()));
 }
 
+QList<WorkStation *> GameLogic::workstations() const
+{
+    QList<WorkStation *> result;
+    result << mAgent;
+    result << mUsers;
+    result << mDevelopers;
+    return result;
+}
+
 void GameLogic::setupNewComputers()
 {
     QRectF const scene = mView->sceneRect();
-    mAgent = new WorkStation(stations::hacker);
+    mAgent = new WorkStation(mGenerator, stations::hacker);
     mView->setItemToScene(mAgent);
     mAgent->setPos(scene.right() - 110, scene.center().y());
     connect(this, SIGNAL(newWorkingDay()), mAgent, SLOT(dataTransfer()));
 
-    mDevelopers = new WorkStation(stations::target);
-    mView->setItemToScene(mDevelopers);    
+    mDevelopers = new WorkStation(mGenerator, stations::target);
+    mView->setItemToScene(mDevelopers);
     mDevelopers->setPos(scene.left() + 10, scene.center().y() - scene.height() / 10);
     connect(mDevelopers, SIGNAL(secretDepartInfected()), this, SLOT(gameOver()));
 
     mUsersCount = (mGenerator->rand() % (maxUsers - minUsers + 1)) + minUsers;
     for (int i = 0; i < mUsersCount; i++)
     {
-        WorkStation *newStation = new WorkStation();
+        WorkStation *newStation = new WorkStation(mGenerator);
         mView->setItemToScene(newStation);
         mUsers.append(newStation);
         connect(this, SIGNAL(newWorkingDay()), newStation, SLOT(dataTransfer()));
@@ -122,12 +131,14 @@ void GameLogic::startGame()
     setUsersToGrid();
     createNetworkConnection();
     makeLinks();
+    emit gameStarted();
     stepTimer.start(stepTime);
 }
 
 void GameLogic::stopGame()
 {
     stepTimer.stop();
+    emit gameWasOver();
 }
 
 void GameLogic::startReloadTime()

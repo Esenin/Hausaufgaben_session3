@@ -2,8 +2,9 @@
 
 using namespace stations;
 
-WorkStation::WorkStation(StationType const stationType)
-    : mStationType(stationType)
+WorkStation::WorkStation(PseudoRandomGenerator *generator, stations::StationType const stationType)
+    : mGenerator(generator)
+    , mStationType(stationType)
     , mBoundingRect(QRectF(0,0, 100, 160))
     , mCouldBeUpdated(true)
     , mSkipOneDay(false)
@@ -86,6 +87,11 @@ void WorkStation::connectWith(QSet<WorkStation *> const list)
     }
 }
 
+void WorkStation::disconnectAll()
+{
+    mConnected.clear();
+}
+
 QSet<WorkStation *> WorkStation::connected() const
 {
     return mConnected;
@@ -125,7 +131,7 @@ void WorkStation::dataTransfer()
     int const damagePerAttak = 1;
     foreach (WorkStation *station, mConnected)
     {
-        int const attackPerfomance = qrand() % 100;
+        int const attackPerfomance = mGenerator->rand() % 100;
         if (attackPerfomance > calcDefenceRate(station->mOperationSystem, station->mBasesActuality))
             station->getVirus();
         else
@@ -177,9 +183,9 @@ void WorkStation::initSocialPos(const StationType stationType)
 
     QStringList nameList;
     loadFromFile(&nameList);
-    mName = nameList.at(qrand() % nameList.size());
-    mOperationSystem = (OperationSystems) ((qrand() % osCount) + debian);
-    mBasesActuality = 100 - (qrand() % 10);
+    mName = nameList.at(mGenerator->rand() % nameList.size());
+    mOperationSystem = (OperationSystems) ((mGenerator->rand() % osCount) + debian);
+    mBasesActuality = 100 - (mGenerator->rand() % 10);
     mInfected = false;
 }
 
@@ -205,6 +211,7 @@ void WorkStation::getVirus()
     mInfected = true;
     mSkipOneDay = true;
     mBasesActuality = 0;
+    emit infected(mName);
     update(mBoundingRect);
 }
 

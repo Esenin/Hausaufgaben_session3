@@ -3,6 +3,7 @@
 #include <QtCore/QObject>
 #include <QtTest/QTest>
 
+#include "liveRandGenerator.h"
 #include "workStation.h"
 
 class WorkStationTest : public QObject
@@ -10,14 +11,16 @@ class WorkStationTest : public QObject
     Q_OBJECT
 
 private:
+    LiveRandomGenerator *mGenerator;
     WorkStation *mStation;
     WorkStation *mMainServer;
 
 private slots:
     void initTestCase()
     {
-        mStation = new WorkStation();
-        mMainServer = new WorkStation(stations::target);
+        mGenerator = new LiveRandomGenerator();
+        mStation = new WorkStation(mGenerator);
+        mMainServer = new WorkStation(mGenerator, stations::target);
         QVERIFY(mStation != 0 && mMainServer != 0);
     }
 
@@ -45,6 +48,7 @@ private slots:
     {
         delete mStation;
         delete mMainServer;
+        delete mGenerator;
     }
 };
 

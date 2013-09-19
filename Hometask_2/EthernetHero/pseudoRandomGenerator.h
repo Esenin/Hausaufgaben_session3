@@ -1,6 +1,5 @@
 #pragma once
 
-//!
 //! \brief The PseudoRandomGenerator class
 //! interface for different random generators
 class PseudoRandomGenerator

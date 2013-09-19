@@ -4,7 +4,6 @@
 #include "gameView.h"
 #include "workStation.h"
 
-
 //! @class GameLogic provides action control and checks current game status
 class GameLogic : public QObject
 {
@@ -12,15 +11,19 @@ class GameLogic : public QObject
 public:
     //! @arg viewport game field
     explicit GameLogic(GameView  *viewport, PseudoRandomGenerator *generator);
+    QList<WorkStation *> workstations() const;
 
 public slots:
     void startGame();
     void stopGame();
     void startReloadTime();
     void gameOver();
+    void stepTimerEvent();
 
 signals:
     //! says its time to transfer information
+    void gameStarted();
+    void gameWasOver();
     void newWorkingDay();
     void energyChanged(bool);
 
@@ -68,9 +71,4 @@ private:
 
     int mUsersCount;
     int mTimeForReload;
-
-private slots:
-    void stepTimerEvent();
 };
-
-

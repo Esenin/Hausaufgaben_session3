@@ -3,7 +3,6 @@
 #include <QtWidgets/QMainWindow>
 
 #include "liveRandGenerator.h"
-#include "tests/testRandomGenerator.h"
 #include "gameView.h"
 #include "gameLogic.h"
 
@@ -23,7 +22,7 @@ public:
 private:
     void keyPressEvent(QKeyEvent *event);
     Ui::MainWindow *ui;
-    TestRandomGenerator *mGenerator;
+    LiveRandomGenerator *mGenerator;
     GameLogic *mGameKernel;
     GameView mViewport;
 };

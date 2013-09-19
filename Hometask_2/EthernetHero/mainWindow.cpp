@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     showMaximized();
     setWindowTitle("EthernetHero the Game");
 
-    mGenerator = new TestRandomGenerator();
+    mGenerator = new LiveRandomGenerator();
     mGameKernel = new GameLogic(&mViewport, mGenerator);
 
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));

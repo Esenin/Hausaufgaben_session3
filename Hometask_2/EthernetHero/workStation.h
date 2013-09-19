@@ -6,6 +6,8 @@
 #include <QtGui/QPainter>
 #include <QtCore/QSet>
 
+#include "pseudoRandomGenerator.h"
+
 namespace stations
 {
 enum StationType
@@ -22,7 +24,7 @@ class WorkStation : public QObject, public QGraphicsItem
     Q_OBJECT
     Q_INTERFACES(QGraphicsItem)
 public:
-    explicit WorkStation(stations::StationType const stationType = stations::user);
+    explicit WorkStation(PseudoRandomGenerator *generator, stations::StationType const stationType = stations::user);
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, QStyleOptionGraphicsItem const *option, QWidget *widget);
@@ -35,6 +37,8 @@ public:
     void connectWith(WorkStation *station);
     //! connects this station with @arg list stations
     void connectWith(QSet<WorkStation *> const list);
+    //! drops all connections
+    void disconnectAll();
 
     QSet<WorkStation *> connected() const;
     bool isInfected() const;
@@ -47,6 +51,7 @@ public slots:
 
 signals:
     void updated();
+    void infected(QString name);
     void secretDepartInfected();
 
 protected:
@@ -67,6 +72,7 @@ protected:
     int calcDefenceRate(OperationSystems const osType, int const basesRate);
 
 private:
+    PseudoRandomGenerator *mGenerator;
     OperationSystems mOperationSystem;
     stations::StationType mStationType;
     int mBasesActuality;
